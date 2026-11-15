@@ -1,7 +1,5 @@
 # Trends-Big-Data-Mng-Project
 
-# Trends-Big-Data-Mng-Project
-
 COMP5118 P6-a: Corner-Kick Analytics
 Project Overview
 This project uses StatsBomb Open Data to study corner kicks in football (soccer). The Phase 1 objective is to build a reliable dataset of corner-kick sequences that can later support descriptive analysis and prediction.
