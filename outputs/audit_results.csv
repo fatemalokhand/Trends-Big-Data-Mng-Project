@@ -1,0 +1,101 @@
+corner_id,match_id,competition,original_outcome,corner_found,events_match,event_order_match,timestamp_check,recalculated_outcome,outcome_match,terminal_reason,audit_status,notes
+Euro 2020_3795109_f7219cf3-7cb8-485a-8d85-e18f90510dab,3795109,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857275_35d9ca62-acc4-476d-930e-29b07e8650c5,3857275,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857260_efd85605-9cec-421a-8d2a-9dcbf29a39ad,3857260,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857299_791471b4-f2c9-4c4a-a2ed-09272dae8fc5,3857299,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857295_c0af80d1-efb1-4575-a0ba-2df9df8e87ef,3857295,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857291_7dc75aa1-0777-48a5-affb-954cda9fdd3c,3857291,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857280_dfaef8aa-4741-4f12-9136-785acf4208c9,3857280,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857274_7ec36022-092c-42bd-8ae0-703f45a7c523,3857274,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3788771_4278c669-5e85-4c09-8330-31c2d3541baa,3788771,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857271_d8a16bae-cc5c-4ef9-a286-3c8143b54659,3857271,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3794686_caf49964-3b36-4ea4-ae0b-ebefa7dbcf6a,3794686,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3788751_612abe29-bfca-4c84-baaa-fc490a357d64,3788751,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857263_35504258-b159-4217-9b47-bd72951629d7,3857263,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857263_940341af-e696-478f-a162-76e4befd2189,3857263,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857272_1d3d380e-7c90-4476-bc73-8b4732deeeb7,3857272,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857291_a6a650c6-f203-4d6c-96af-bdcccf138956,3857291,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857292_88ac6d03-e86b-4edd-bc30-fe6b8cf0fe00,3857292,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3788765_a072652a-32e8-45f2-8b12-7e1c8a330d24,3788765,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3794689_80979f98-e99f-4463-82e7-f45f60c35495,3794689,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857261_da82f168-b466-4da6-94d4-af34d1cf4681,3857261,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3788774_cfddb8d8-dcd2-41b2-8da4-d48af52d420a,3788774,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857288_879142d9-d01d-41ef-b7d4-72b5bfcee38b,3857288,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3795220_d53ea9b5-4357-4ade-b34b-46a69e1a004e,3795220,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3788750_7309b88b-f2a1-40b9-948c-54cf0ab7f167,3788750,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857291_3f136e08-487e-4dd4-874a-5bc2f568a97c,3857291,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3788755_fe56afc8-9bef-4333-8a85-701cc97d5518,3788755,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+Euro 2020_3794686_52005dcd-771b-4634-a735-aeca5f70f9e7,3794686,Euro 2020,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857299_e6bb508b-d180-4ddc-9abc-19e27b2192e6,3857299,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857254_963dabe7-3a7d-479d-8e8c-4cb14b6a9431,3857254,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857282_7e30ba53-0a7f-4b7f-8671-c36fc1738f43,3857282,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3869321_f069cf38-3a81-45d6-80d8-56cf96eac05f,3869321,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857282_bf796a39-67f1-42ef-bd0b-9a80bc890574,3857282,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857291_864288d8-6f4e-4cd9-8166-c9a720475776,3857291,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3869254_9ac1505e-50a3-4959-94b3-d16adb330772,3869254,World Cup 2022,no_clear_terminal_outcome,YES,YES,YES,YES,no_clear_terminal_outcome,YES,10_event_cutoff,REVIEW,Unresolved sequence requires human review
+World Cup 2022_3857272_be51da35-c2e3-4c79-a73a-496c00dc86a8,3857272,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857269_6d787c5f-c6e5-4a97-a3ad-aaef41273863,3857269,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788758_b1815353-6aa5-4035-ae13-be11603312a9,3788758,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857270_c90ff546-0af2-457b-9c6b-ff5f75c524e5,3857270,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788755_913c6f38-a56f-4f16-8333-979ac017b549,3788755,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788751_21d2565c-8f25-4aa6-9754-89076ec1f20a,3788751,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3869420_1c6bd271-ff36-4adf-af32-8705891ac2ac,3869420,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857260_b5104e25-196e-49f6-a737-d93907d57e21,3857260,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788770_279d6713-610c-411e-85e6-0ad890605237,3788770,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3795108_fc1aefba-60c8-4c67-8f3c-272852c4c272,3795108,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857279_b7dec82e-2ec4-41c4-8169-71e98e3f1dcb,3857279,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788758_7b463784-8139-485c-a6a4-dff3bd923322,3788758,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857267_523f7ed6-150d-47f1-90cb-2ddd449e80d7,3857267,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3795187_1df2c230-908a-4c9f-839a-c3eb3e0fa80c,3795187,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788741_b1818e56-21c4-4bf9-9f45-53d9b5f42cd1,3788741,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788755_36bcb92f-3f7d-4742-a486-c19358c7864b,3788755,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857298_af958908-0a63-4108-a32e-489f45da30b8,3857298,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857266_972983dc-5748-47fd-b55f-c78597192468,3857266,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857260_39aa82cc-ac9a-4601-b29c-753d35affbff,3857260,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3869152_2ef82187-dec2-4313-b016-7738811328c1,3869152,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788741_850a75e6-1f54-4bc2-9055-36cfb63a475e,3788741,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3869219_08c594ef-d0b2-454a-b54b-b8e63519673f,3869219,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857272_720871fa-ecfd-4839-a5ef-2a9bb486a72b,3857272,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3869684_8be9e3f9-8361-4f58-9efc-0033f4cfa953,3869684,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788770_ef41cb81-a466-4056-aabe-29e5ffd97008,3788770,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788755_f5f7f59a-c8a1-4162-8e00-823c0a1b2e14,3788755,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3857287_d183b7b5-0a0b-4a79-b0e5-aeda205aef4c,3857287,World Cup 2022,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788756_90b6ad49-f6a6-4d28-80c2-78eff079b79c,3788756,Euro 2020,shot_no_goal,YES,YES,YES,YES,shot_no_goal,YES,shot,PASS,Automated checks agree
+World Cup 2022_3869117_fed2f7bb-9626-4701-97ab-8b8747914afa,3869117,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857283_ab1b09fc-59c3-4e2c-a947-99b492107ec8,3857283,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3794689_ed236d52-ebbc-43c1-bcdf-7a093b161a14,3794689,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857292_460640af-aac2-4437-ada0-0854ee57121a,3857292,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3794691_b9d6ce38-dc80-4154-9f8f-f3ba15645e44,3794691,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3794689_0bcebd85-32db-487b-a861-d7f6502cfab9,3794689,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3788776_08013ee4-2a19-41e3-9083-be0900a3d9ef,3788776,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857265_6cfe81a9-64c7-4f7f-aeee-44845ff65d91,3857265,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3788772_f529db12-bd33-4749-887e-eff965f9d850,3788772,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3788776_49583452-4f9a-4da5-b8fe-733b52c52140,3788776,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857276_3dca6069-de5d-4251-a566-ff80b35d590d,3857276,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3788756_4002618b-9586-4e8c-b827-23d199bd2ffe,3788756,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3795107_ffc71a3b-88d0-4607-9a54-b0894dbea98e,3795107,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857287_5f4bded2-2fa6-4b2c-8dec-824f21f6ee7f,3857287,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857275_55253a6c-3b8d-4cb0-8e8a-77ee7041fbcb,3857275,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3869684_2d9a219b-aafb-42e6-958a-8de0a41a7987,3869684,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3869219_56ffdf03-bae3-4764-bf62-4d647c4b8715,3869219,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+World Cup 2022_3857292_1e8a797e-9d30-4a99-812f-0db2e2f35ddc,3857292,World Cup 2022,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3788776_b2947d78-d1df-42e0-bf24-bce6e566bc56,3788776,Euro 2020,another_restart,YES,YES,YES,YES,another_restart,YES,another_restart,PASS,Automated checks agree
+Euro 2020_3788765_66cf63bd-0a2e-4f86-b5e0-ab939d999c78,3788765,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+Euro 2020_3788752_f24d0404-e607-429a-9d5b-673d42732264,3788752,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+World Cup 2022_3857281_fb78ade8-e514-426d-8099-0cdf07be7ff3,3857281,World Cup 2022,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+Euro 2020_3788765_129613cf-7806-40ab-b0d6-9f868694524f,3788765,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+World Cup 2022_3857292_5f2d5685-735e-464a-b54f-bd99cfc9037c,3857292,World Cup 2022,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+Euro 2020_3795109_83275f32-17b4-4ed8-bee4-14ac7c1652ad,3795109,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+Euro 2020_3794692_d182993e-32af-4b5f-9146-4ac5b5bbc759,3794692,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+Euro 2020_3794692_78ef8909-8495-4aad-8404-cae9ccb18507,3794692,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+World Cup 2022_3857262_336f0532-2597-4441-8378-c53e3aa87ace,3857262,World Cup 2022,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+World Cup 2022_3857282_bb16f080-8f88-41d5-8969-b7b578a4050c,3857282,World Cup 2022,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+Euro 2020_3795108_f7b0d164-fd9a-4233-a6f9-c418970909b2,3795108,Euro 2020,possession_loss,YES,YES,YES,YES,possession_loss,YES,possession_change,PASS,Automated checks agree
+World Cup 2022_3857270_95b0ed68-e7fd-4a88-a307-e9a843fcb752,3857270,World Cup 2022,foul_or_offside,YES,YES,YES,YES,foul_or_offside,YES,foul,PASS,Automated checks agree
+Euro 2020_3788765_794a946e-bc48-4860-b9c4-98fd8394ee25,3788765,Euro 2020,foul_or_offside,YES,YES,YES,YES,foul_or_offside,YES,foul,PASS,Automated checks agree
+World Cup 2022_3857298_4965a376-f519-470f-8dad-5f72b66971eb,3857298,World Cup 2022,foul_or_offside,YES,YES,YES,YES,foul_or_offside,YES,foul,PASS,Automated checks agree
+World Cup 2022_3857301_66397e43-7528-4cba-8177-4fe4cc37e9a7,3857301,World Cup 2022,foul_or_offside,YES,YES,YES,YES,foul_or_offside,YES,offside,PASS,Automated checks agree
+World Cup 2022_3857290_96f77aae-9595-481f-a636-d06ddb1121d1,3857290,World Cup 2022,foul_or_offside,YES,YES,YES,YES,foul_or_offside,YES,foul,PASS,Automated checks agree
+Euro 2020_3795221_c8e45f69-0385-4912-830f-11bdae7cf4d4,3795221,Euro 2020,foul_or_offside,YES,YES,YES,YES,foul_or_offside,YES,foul,PASS,Automated checks agree
+World Cup 2022_3869254_1b97f3ce-c6d7-4d54-9f2d-1491a6555071,3869254,World Cup 2022,goal,YES,YES,YES,YES,goal,YES,shot,PASS,Automated checks agree
+Euro 2020_3788749_f0a03d67-ed12-4d64-8b19-7807804e086b,3788749,Euro 2020,goal,YES,YES,YES,YES,goal,YES,shot,PASS,Automated checks agree
