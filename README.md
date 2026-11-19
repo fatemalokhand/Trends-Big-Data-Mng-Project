@@ -20,16 +20,6 @@ corner_project/
 ├── extract_corners.py
 └── README.md
 
-corner_project/
-├── data/
-├── outputs/
-├── available_competitions.csv
-├── check_data.py
-├── choose_dataset.py
-├── download_data.py
-├── extract_corners.py
-└── README.md
-
 The exact folder names must match the paths used in the Python scripts. Keep competitions separate during downloading and verification so that the source of each match remains identifiable.
 
 The outputs/ folder is intended for generated datasets, audit samples, and analysis results.
@@ -39,11 +29,11 @@ The project uses StatsBomb Open Data, which provides selected football match dat
 Two kinds of data are relevant:
 - Event data: chronological match events, including passes, shots, fouls, possession information, and other actions.
 - 360 data: snapshots of player and pitch positioning for certain events in selected matches. Availability of a 360 file does not guarantee that every event or corner has a usable 360 snapshot.
+  
 The Open Data repository contains selected matches, not necessarily every match in an official competition season. Therefore, downloaded match counts should be reported as actual dataset coverage rather than official competition totals.
 Scripts and Their Responsibilities
 1. choose_dataset.py
 Purpose: Help identify available StatsBomb competitions and seasons.
-
 What it does:
 1. Retrieves the StatsBomb Open Data competition information.
 2. Displays competition and season information.
@@ -51,12 +41,15 @@ What it does:
 Output: Competition/season information for selecting datasets.
 
 Important note: The competition listing alone does not establish how many match event files or usable 360 snapshots are available. Those counts must be checked separately.
+
 2. available_competitions.csv
-Purpose: Store competition information obtained during dataset selection.
+- Purpose: Store competition information obtained during dataset selection.
 
-What it contains: Competition and season metadata, such as IDs, names, countries, and available 360-related metadata when supplied by the source.
+- What it contains: Competition and season metadata, such as IDs, names, countries, and available 360-related metadata when supplied by the source.
 
-Use: Reference this file when selecting competition and season IDs for downloading.
+- Use: Reference this file when selecting competition and season IDs for downloading.
+
+
 3. download_data.py
 Purpose: Download match data for a selected competition and season.
 
@@ -70,6 +63,8 @@ Expected data products:
 - One event JSON file per downloaded match.
 - A 360 JSON file for matches where the corresponding file is available.
 Important note: The script's actual destination folders determine where check_data.py must look. Confirm these paths before assuming that a download failed.
+
+
 4. check_data.py
 Purpose: Verify that downloaded data files exist locally.
 
@@ -87,6 +82,8 @@ Troubleshooting: If it reports zero files, check:
 - Whether the JSON files are nested one level deeper.
 - Whether the script paths match the downloader's save paths.
 A zero count does not necessarily mean that the files were not downloaded.
+
+
 5. extract_corners.py
 Purpose: Create an initial dataset of corner-kick sequences from event JSON files.
 
@@ -110,6 +107,8 @@ Expected output files:
 - outputs/corner_sequences.csv — one row per extracted corner sequence.
 - outputs/sequence_events_audit.csv — event-level records used to inspect reconstructed sequences.
 Important limitation: This is an initial implementation and must be tested against raw event JSON before it is treated as a validated extraction method. In particular, possession-loss detection, restart detection, event ordering, and cutoff handling require manual checks.
+
+
 6. audit_corners.py (planned/next script)
 Purpose: Support manual validation of extracted corner sequences.
 
@@ -161,6 +160,8 @@ Possible baselines:
 - Majority-class baseline: always predict the most frequent outcome.
 - Training-set shot-rate baseline: predict the training-set probability of a corner producing a shot.
 Possible evaluation metrics include log loss, Brier score, and suitable classification metrics. The choice should be documented before reporting final results.
+
+
 Current Progress
 Based on the current project files and work completed:
 - [x] Created project folders (data/ and outputs/).
