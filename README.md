@@ -33,12 +33,12 @@ Two kinds of data are relevant:
 The Open Data repository contains selected matches, not necessarily every match in an official competition season. Therefore, downloaded match counts should be reported as actual dataset coverage rather than official competition totals.
 Scripts and Their Responsibilities
 1. choose_dataset.py
-Purpose: Help identify available StatsBomb competitions and seasons.
+  Purpose: Help identify available StatsBomb competitions and seasons.
 What it does:
-1. Retrieves the StatsBomb Open Data competition information.
-2. Displays competition and season information.
-3. Helps identify the competition ID and season ID needed by the downloader.
-Output: Competition/season information for selecting datasets.
+  1. Retrieves the StatsBomb Open Data competition information.
+  2. Displays competition and season information.
+  3. Helps identify the competition ID and season ID needed by the downloader.
+  Output: Competition/season information for selecting datasets.
 
 Important note: The competition listing alone does not establish how many match event files or usable 360 snapshots are available. Those counts must be checked separately.
 
