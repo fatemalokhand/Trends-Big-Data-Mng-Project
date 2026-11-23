@@ -103,12 +103,15 @@ def find_sequence(events, corner_index):
             break
 
         # Apply 15-second time cutoff
+               # Apply 15-second time cutoff
         event_time = get_timestamp(event)
 
         if corner_time is not None and event_time is not None:
+
             elapsed = event_time - corner_time
 
-            if elapsed > MAX_SECONDS:
+            # Stop if more than 15 seconds have passed
+            if elapsed < 0 or elapsed > MAX_SECONDS:
                 terminal_label = "no_clear_terminal_outcome"
                 terminal_reason = "15-second cutoff"
                 break

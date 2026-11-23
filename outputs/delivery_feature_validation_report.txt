@@ -1,0 +1,471 @@
+
+1. FILE SUMMARY
+----------------------------------------
+Delivery feature records: 1030
+Corner sequence records:  1030
+
+2. CORNER ID CHECK
+----------------------------------------
+Delivery IDs: 1030
+Unique delivery IDs: 1030
+Duplicate delivery IDs: 0
+Sequence IDs: 1030
+Unique sequence IDs: 1030
+Duplicate sequence IDs: 0
+
+3. DELIVERY-TO-SEQUENCE JOIN CHECK
+----------------------------------------
+Matching corner IDs: 1030
+Delivery IDs without a sequence: 0
+Sequence IDs without delivery features: 0
+
+4. MATCH AND COMPETITION CONSISTENCY
+----------------------------------------
+Competition/match mismatches: 0
+
+5. FEATURE AVAILABILITY
+----------------------------------------
+corner_id: 1030 available, 0 missing
+competition: 1030 available, 0 missing
+match_id: 1030 available, 0 missing
+team: 1030 available, 0 missing
+player: 1030 available, 0 missing
+period: 1030 available, 0 missing
+timestamp: 1030 available, 0 missing
+corner_x: 1030 available, 0 missing
+corner_y: 1030 available, 0 missing
+corner_side_y: 1030 available, 0 missing
+pass_type: 1030 available, 0 missing
+pass_height: 1030 available, 0 missing
+pass_technique: 838 available, 192 missing
+pass_end_x: 1030 available, 0 missing
+pass_end_y: 1030 available, 0 missing
+pass_length: 1030 available, 0 missing
+pass_angle: 1030 available, 0 missing
+delivery_completion_status: 1030 available, 0 missing
+pass_outcome: 567 available, 463 missing
+recipient: 602 available, 428 missing
+
+6. CONSTANT AND FULLY MISSING FEATURES
+----------------------------------------
+corner_x: CONSTANT (only value: 120.0)
+pass_type: CONSTANT (only value: Corner)
+
+7. NUMERIC AND COORDINATE VALIDATION
+----------------------------------------
+corner_x: min=120.00, max=120.00, invalid=0, missing=0
+corner_y: min=0.10, max=80.00, invalid=0, missing=0
+pass_end_x: min=83.40, max=120.00, invalid=0, missing=0
+pass_end_y: min=0.10, max=80.00, invalid=0, missing=0
+pass_length: min=3.49, max=82.65, invalid=0, missing=0
+pass_angle: min=-3.06, max=3.02, invalid=0, missing=0
+
+Coordinate values outside pitch boundaries:
+corner_x: 0 outside boundaries
+corner_y: 0 outside boundaries
+pass_end_x: 0 outside boundaries
+pass_end_y: 0 outside boundaries
+
+8. CATEGORICAL FEATURE DISTRIBUTIONS
+----------------------------------------
+
+competition:
+  World Cup 2022: 569
+  Euro 2020: 461
+
+pass_type:
+  Corner: 1030
+
+pass_height:
+  High Pass: 817
+  Ground Pass: 192
+  Low Pass: 21
+
+pass_technique:
+  Inswinging: 426
+  Outswinging: 379
+  [MISSING]: 192
+  Straight: 33
+
+pass_outcome:
+  Incomplete: 530
+  [MISSING]: 463
+  Unknown: 22
+  Out: 14
+  Pass Offside: 1
+
+recipient:
+  [MISSING]: 428
+  John Stones: 12
+  Harry Maguire: 11
+  Raphaël Adelino José Guerreiro: 7
+  Luka Modrić: 7
+  Jannik Vestergaard: 7
+  Joachim Andersen: 6
+  Antonio Rüdiger: 6
+  Lionel Andrés Messi Cuccittini: 6
+  Silvan Widmer: 6
+  Manuel Obafemi Akanji: 6
+  Bruno Miguel Borges Fernandes: 6
+  Ivan Perišić: 6
+  Thomas Müller: 6
+  Tomáš Souček: 6
+  Thomas Delaney: 5
+  Marco Asensio Willemsen: 5
+  Jan Vertonghen: 5
+  Matthijs de Ligt: 5
+  Nico Elvedi: 5
+  Merih Demiral: 5
+  Jorge Resurrección Merodio: 5
+  Victor Nilsson Lindelöf: 5
+  César Azpilicueta Tanco: 5
+  Kléper Laveran Lima Ferreira: 4
+  Robert Lewandowski: 4
+  Raphaël Varane: 4
+  Declan Rice: 4
+  Andrej Kramarić: 4
+  Virgil van Dijk: 4
+  Breel-Donald Embolo: 4
+  Daniel Olmo Carvajal: 4
+  Olivier Giroud: 4
+  Giorgio Chiellini: 4
+  Leonardo Bonucci: 4
+  Giovanni Di Lorenzo: 4
+  Patrik Schick: 4
+  Pierre-Emile Højbjerg: 3
+  Andreas Christensen: 3
+  Pedro González López: 3
+  Rodrigo Javier De Paul: 3
+  Dayotchanculle Upamecano: 3
+  Adrien Rabiot: 3
+  Rodrygo Silva de Goes: 3
+  Kieffer Roberto Francisco Moore: 3
+  Eden Hazard: 3
+  Issam Jebali: 3
+  Enzo Fernandez: 3
+  Famara Diedhiou: 3
+  Mateo Kovačić: 3
+  Carlos Soler Barragán: 3
+  Rúben Santos Gato Alves Dias: 3
+  Fabian Lukas Schär: 3
+  Marcel Sabitzer: 3
+  John McGinn: 3
+  Grant Campbell Hanley: 3
+  Kaan Ayhan: 3
+  Burak Yılmaz: 3
+  Christoph Baumgartner: 3
+  Sasa Kalajdzic: 3
+  Philip Foden: 3
+  Marcus Berg: 3
+  Simon Thorup Kjær: 3
+  Jeremy Doku: 3
+  Sergio Busquets i Burgos: 3
+  Youssef Msakni: 2
+  Andreas Evald Cornelius: 2
+  Rodrigo Hernández Cascante: 2
+  Nikola Milenković: 2
+  Thiago Emiliano da Silva: 2
+  Ngoran Suiru Fai Collins: 2
+  Rúben Diogo Da Silva Neves: 2
+  Gue-Sung Cho: 2
+  Kamil Glik: 2
+  Héctor Alfredo Moreno Herrera: 2
+  Aurélien Djani Tchouaméni: 2
+  Felix Eduardo Torres Caicedo: 2
+  Kalidou Koulibaly: 2
+  Gabriel Fernando de Jesus: 2
+  Joe Rodon: 2
+  Moisés Isaac Caicedo Corozo: 2
+  Kylian Mbappé Lottin: 2
+  Ousmane Dembélé: 2
+  Ibrahima Konaté: 2
+  Gleison Bremer Silva Nascimento: 2
+  Christopher Wooh: 2
+  Pedro Guilherme Abreu dos Santos: 2
+  Dejan Lovren: 2
+  Toby Alderweireld: 2
+  Amadou Onana: 2
+  Sofyan Amrabat: 2
+  Wataru Endo: 2
+  Pape Abou Cissé: 2
+  Min Jae Kim: 2
+  Nicolás Hernán Otamendi: 2
+  Haris Seferović: 2
+  Abdelkarim Hassan Al Haj Fadlalla: 2
+  Cody Mathès Gakpo: 2
+  Mohamed Salisu: 2
+  Memphis Depay: 2
+  Shogo Taniguchi: 2
+  Aymeric Laporte: 2
+  Xherdan Shaqiri: 2
+  Granit Xhaka: 2
+  Alexis Mac Allister: 2
+  Jordan Brian Henderson: 2
+  Lovro Majer: 2
+  Youssef En-Nesyri: 2
+  Marcelo Brozović: 2
+  Lorenzo Insigne: 2
+  Joe Allen: 2
+  Denis Lemi Zakaria Lako Lado: 2
+  Andriy Yarmolenko: 2
+  Daley Blind: 2
+  Wout Weghorst: 2
+  Vladimír Darida: 2
+  Lukáš Masopust: 2
+  Scott McTominay: 2
+  Álvaro Borja Morata Martín: 2
+  Gerard Moreno Balaguero: 2
+  Paul Pogba: 2
+  Igor Diveev: 2
+  Gareth Frank Bale: 2
+  Martin Hinteregger: 2
+  Mikkel Damsgaard: 2
+  Ezgjan Alioski: 2
+  Oleksandr Zinchenko: 2
+  Visar Musliu: 2
+  Vladimír Coufal: 2
+  Alexander Isak: 2
+  Yusuf Yazıcı: 2
+  Rafael Tolói: 2
+  Federico Chiesa: 2
+  Aleksandar Dragović: 2
+  Thomas Vermaelen: 2
+  Pablo Sarabia García: 2
+  Mateusz Andrzej Klich: 2
+  Jordi Alba Ramos: 2
+  Petr Ševčík: 2
+  Bryan Cristante: 2
+  Yassine Meriah: 1
+  Anis Ben Slimane: 1
+  Dylan Daniel Mahmoud Bronn: 1
+  Pablo Martín Páez Gavira: 1
+  Christian Dannemann Eriksen: 1
+  Riley McGree: 1
+  Mitchell Thomas Duke: 1
+  Lucas Tolentino Coelho de Lima: 1
+  Strahinja Pavlović: 1
+  Antony Matheus dos Santos: 1
+  Nicolas Alexis Julio N'Koulou Ndoubena: 1
+  Gaël Ondoua: 1
+  Jesús Daniel Gallardo Vasconcelos: 1
+  César Jasib Montes Castro: 1
+  Henry Josué Martín Mex: 1
+  Abdullah Mohammed Madu: 1
+  Aaron Ramsey: 1
+  Kang-In Lee: 1
+  Niclas Füllkrug: 1
+  Nicholas Williams Arthuer: 1
+  Thiago Ezequiel Almada: 1
+  Jakub Kamiński: 1
+  Luis Gerardo Chávez Magallón: 1
+  Héctor Miguel Herrera López: 1
+  Jakub Piotr Kiwior: 1
+  Joakim Mæhle: 1
+  Jules Koundé: 1
+  Abdou Diallo: 1
+  Tajon Buchanan: 1
+  Jonathan David: 1
+  Leander Dendoncker: 1
+  Leandro Trossard: 1
+  Frederico Rodrigues Santos: 1
+  Alex Nicolao Telles: 1
+  Mathías Olivera Miramontes: 1
+  Nuno Mendes: 1
+  Ali Gholizadeh: 1
+  Ramin Rezaeian: 1
+  Ehsan Hajsafi: 1
+  Gonzalo Jordy Plata Jiménez: 1
+  Mattéo Guendouzi Olié: 1
+  Aïssa Bilal Laïdouni: 1
+  Axel Disasi: 1
+  Eduardo Camavinga: 1
+  Hakim Ziyech: 1
+  Atiba Hutchinson: 1
+  Alistair Johnston: 1
+  Sergino Dest: 1
+  Antoine Griezmann: 1
+  Fábio Henrique Tavares: 1
+  Daniel Alves da Silva: 1
+  André-Frank Zambo Anguissa: 1
+  Alphonso Davies: 1
+  Ben Davies: 1
+  Brenden Aaronson: 1
+  Charles De Ketelaere: 1
+  Ao Tanaka: 1
+  Maya Yoshida: 1
+  Ko Itakura: 1
+  Takehiro Tomiyasu: 1
+  Boulaye Dia: 1
+  Nathan Aké: 1
+  Youssouf Sabaly: 1
+  Ismail Jakobs: 1
+  Michael Steveen Estrada Martínez: 1
+  Kevin José Rodríguez Cortez: 1
+  Matías Vecino Falero: 1
+  Diego Roberto Godín Leal: 1
+  Facundo Pellistri Rebollo: 1
+  Jackson Irvine: 1
+  Ángel Fabián Di María Hernández: 1
+  Fabian Rieder: 1
+  Jamal Musiala: 1
+  Kai Havertz: 1
+  Darwin Gabriel Núñez Ribeiro: 1
+  Daniel Amartey: 1
+  Antoine Semenyo: 1
+  Federico Santiago Valverde Dipetta: 1
+  Davy Klaassen: 1
+  Saleh Khalid Al Shehri: 1
+  Krystian Bielik: 1
+  Abdulelah Al Amri: 1
+  Salem Mohammed Al Dawsari: 1
+  André Ayew Pelé: 1
+  Chang-Hoon Kwon: 1
+  In-Beom Hwang: 1
+  Thomas Teye Partey: 1
+  Abdulelah Saad Hameed Al-Malki: 1
+  Lautaro Javier Martínez: 1
+  Mohammed Kanoo: 1
+  Homam Alamin Ahmed: 1
+  Idrissa Gana Gueye: 1
+  Weston McKennie: 1
+  Tim Ream: 1
+  Fodé Ballo Touré: 1
+  Harry Souttar: 1
+  Grzegorz Krychowiak: 1
+  Daichi Kamada: 1
+  Takumi Minamino: 1
+  Jae-Sung Lee: 1
+  Raphael Dias Belloli: 1
+  Vinícius José Paixão de Oliveira Júnior: 1
+  Gonçalo Matias Ramos: 1
+  Germán Alejandro Pezzella: 1
+  Jude Bellingham: 1
+  Neymar da Silva Santos Junior: 1
+  Achraf Hakimi Mouh: 1
+  João Pedro Cavaco Cancelo: 1
+  João Félix Sequeira: 1
+  Sofiane Boufal: 1
+  Randal Kolo Muani: 1
+  Domenico Berardi: 1
+  Mário Figueira Fernandes: 1
+  Georginio Wijnaldum: 1
+  Owen Wijndal: 1
+  Jack Hendry: 1
+  Alex Král: 1
+  Maciej Rybus: 1
+  Marek Hamšík: 1
+  Glen Kamara: 1
+  Francesco Acerbi: 1
+  Caglar Söyüncü: 1
+  Chris Mepham: 1
+  Stefan Lainer: 1
+  Thorgan Hazard: 1
+  Illia Zabarnyi: 1
+  Oleksandr Karavaev: 1
+  Enis Bardhi: 1
+  Bruno Petković: 1
+  Juraj Kucka: 1
+  Tomáš Hubočan: 1
+  Ľubomír Šatka: 1
+  Dávid Hancko: 1
+  Martin Koscelník: 1
+  Endre Botka: 1
+  Renato Júnior Luz Sanches: 1
+  Ozan Tufan: 1
+  Chris Gunter: 1
+  Alessandro Bastoni: 1
+  Matteo Pessina: 1
+  Xaver Schlager: 1
+  Mykola Shaparenko: 1
+  Viktor Tsygankov: 1
+  Jason Denayer: 1
+  Denzel Dumfries: 1
+  Ryan Gravenberch: 1
+  Aleksandar Trajkovski: 1
+  Eljif Elmas: 1
+  Darko Velkovski: 1
+  Kalvin Phillips: 1
+  Tomáš Holeš: 1
+  András Schäfer: 1
+  Mats Hummels: 1
+  Robin Gosens: 1
+  Thiago Alcântara do Nascimento: 1
+  Emil Peter Forsberg: 1
+  Konrad Laimer: 1
+  Eric García Martret: 1
+  Ferrán Torres García: 1
+  Mislav Oršić: 1
+  João Filipe Iria Santos Moutinho: 1
+  Leon Goretzka: 1
+  Daniel James: 1
+  Stefan de Vrij: 1
+  Adam Hložek: 1
+  Admir Mehmedi: 1
+  Ciro Immobile: 1
+  Steven Zuber: 1
+  Marcos Llorente Moreno: 1
+  Pau Francisco Torres: 1
+  Ondrej Celustka: 1
+  Antonín Barák: 1
+  Jack Grealish: 1
+
+team:
+  Spain: 68
+  Denmark: 60
+  Switzerland: 56
+  England: 54
+  France: 53
+  Portugal: 43
+  Germany: 42
+  Croatia: 41
+  Netherlands: 39
+  Argentina: 38
+  Belgium: 37
+  Brazil: 36
+  Italy: 31
+  Czech Republic: 28
+  Poland: 27
+  South Korea: 24
+  United States: 22
+  Tunisia: 21
+  Senegal: 21
+  Austria: 21
+  Turkey: 20
+  Sweden: 20
+  Wales: 19
+  Japan: 19
+  Scotland: 18
+  Mexico: 16
+  Ukraine: 15
+  Ghana: 13
+  Cameroon: 12
+  Canada: 12
+  Morocco: 12
+  Ecuador: 11
+  North Macedonia: 10
+  Serbia: 9
+  Qatar: 9
+  Russia: 9
+  Australia: 8
+  Saudi Arabia: 8
+  Uruguay: 8
+  Iran: 8
+  Slovakia: 8
+  Hungary: 2
+  Costa Rica: 1
+  Finland: 1
+
+9. VALIDATION SUMMARY
+----------------------------------------
+PASS: Expected delivery record count (1030)
+PASS: No duplicate delivery IDs
+PASS: No duplicate sequence IDs
+PASS: All delivery IDs have sequences
+PASS: All sequence IDs have delivery features
+PASS: No match/competition mismatches
+
+Important:
+- Missing values are not automatically errors.
+- A constant feature may not help distinguish outcomes.
+- Coordinates outside the pitch boundaries need investigation.
+- Passing these checks does not replace manual sequence auditing.
