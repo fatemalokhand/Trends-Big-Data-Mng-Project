@@ -1,551 +1,247 @@
-"""This script audits extracted StatsBomb corner sequences against the original match event JSON files.
-It verifies that the extracted sequences match the original data, checks timestamps, and recalculates outcomes"""
+"""Audit a reproducible sample of corner sequences against the raw StatsBomb events.
+
+For each sampled corner this script re-reads the original match JSON and checks,
+using logic written independently of extract_corners.py:
+
+  1. corner_found        the event ID exists in the raw file and is a corner pass
+  2. membership_ok       the extracted event IDs equal the raw events between the
+                         corner and the stopping point
+  3. order_ok            extracted events are in raw `index` order, no gaps
+  4. terminal_ok         the recorded terminal event / reason is what the raw data show
+  5. outcome_ok          the outcome label and the binary `shot` label are correct
+  6. cutoff_ok           elapsed time <= 15 s and on-ball actions <= 10, and when a
+                         cutoff fired, the next raw event really is past the limit
+  7. no_missed_shot      no attacking-team shot occurs in the same possession within
+                         15 s after the stopping point (flags labels the cutoff hides)
+
+Outputs:
+  outputs/audit_sample.csv   the sampled corner IDs (fixed seed)
+  outputs/audit_results.csv  one row per audited corner with every check
+  outputs/audit_sheet.md     human-readable event listing for manual sign-off
+  outputs/audit_report.md    summary with 95% confidence intervals
+
+Run:  python audit_corners.py [--sample-size 100]
+"""
+
+import argparse
 import csv
 import json
+import math
 import random
-import argparse
-from pathlib import Path
-from datetime import datetime
 from collections import Counter, defaultdict
-
-
-# CONFIGURATION
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-
-OUTPUT_DIR = BASE_DIR / "outputs"
-
-CORNER_FILE = OUTPUT_DIR / "corner_sequences.csv"
-EVENT_AUDIT_FILE = OUTPUT_DIR / "sequence_events_audit.csv"
-
-DATASETS = {
-    "World Cup 2022": BASE_DIR / "data" / "world_cup_2022" / "events",
-    "Euro 2020": BASE_DIR / "data" / "euro_2020" / "events",
-}
-
-SAMPLE_SIZE = 100
-RANDOM_SEED = 42
-
-MAX_SECONDS = 15
-MAX_EVENTS = 10
+OUT = BASE_DIR / "outputs"
+FOLDERS = {"World Cup 2022": BASE_DIR / "data" / "world_cup_2022" / "events",
+           "Euro 2020": BASE_DIR / "data" / "euro_2020" / "events"}
+SEED = 42
+LIMIT_S, LIMIT_A = 15.0, 10
+BOOKKEEPING = {"Ball Receipt*", "Pressure", "Substitution", "Tactical Shift", "Injury Stoppage",
+               "Player Off", "Player On", "Bad Behaviour", "Starting XI", "Half Start"}
+RESTARTS = {"Goal Kick", "Throw-in", "Free Kick", "Corner", "Kick Off"}
 
 
-# GENERAL HELPERS
+def nm(d, *path):
+    for k in path:
+        d = d.get(k, {}) if isinstance(d, dict) else {}
+    return d.get("name", "") if isinstance(d, dict) else ""
 
-def get_nested_name(event, *keys):
-    """Safely retrieve a nested StatsBomb name."""
 
-    value = event
+def secs(ts):
+    h, m, s = ts.split(":")
+    return int(h) * 3600 + int(m) * 60 + float(s)
 
-    for key in keys:
-        if not isinstance(value, dict):
+
+def wilson(k, n, z=1.96):
+    if n == 0:
+        return (0.0, 0.0)
+    p = k / n
+    d = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / d
+    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return (max(0, c - h), min(1, c + h))
+
+
+def expected(raw, ci):
+    """Independent re-derivation of the stopping point. Returns dict."""
+    c = raw[ci]
+    team, poss, per, t0 = nm(c, "team"), c["possession"], c["period"], secs(c["timestamp"])
+    ids, actions, j = [], 0, ci + 1
+    while j < len(raw):
+        e = raw[j]
+        k, et = nm(e, "type"), nm(e, "team")
+        ptype = nm(e, "pass", "type")
+        if e["period"] != per or k == "Half End":
+            return dict(ids=ids, reason="period_end", term=None, label="no_shot", stop=j)
+        if k == "Pass" and ptype in RESTARTS:
+            return dict(ids=ids, reason="restart", term=e, label="restart", stop=j)
+        if secs(e["timestamp"]) - t0 > LIMIT_S:
+            return dict(ids=ids, reason="time_cutoff", term=None, label="no_shot", stop=j)
+        ids.append(e["id"])
+        if k not in BOOKKEEPING:
+            actions += 1
+        label = None
+        if k == "Shot":
+            label = ("goal" if nm(e, "shot", "outcome") == "Goal" else "shot_no_goal") if et == team \
+                else "possession_loss"
+        elif k == "Own Goal For":
+            label = "own_goal" if et == team else "possession_loss"
+        elif k == "Own Goal Against":
+            label = "own_goal" if et != team else "possession_loss"
+        elif k == "Foul Committed":
+            label = "foul_by_attack" if et == team else "foul_by_defence"
+        elif k == "Offside" or nm(e, "pass", "outcome") == "Pass Offside":
+            label = "offside"
+        elif k == "Referee Ball-Drop":
+            label = "restart"
+        elif e["possession"] != poss:
+            label = "possession_loss"
+        if label:
+            return dict(ids=ids, reason=k, term=e, label=label, stop=j + 1)
+        if actions >= LIMIT_A:
+            return dict(ids=ids, reason="action_cutoff", term=None, label="no_shot", stop=j + 1)
+        j += 1
+    return dict(ids=ids, reason="end_of_file", term=None, label="no_shot", stop=j)
+
+
+def missed_shot(raw, ci, stop):
+    """Attacking shot in the same possession within 15 s *after* the stopping point."""
+    c = raw[ci]
+    t_stop = secs(raw[stop - 1]["timestamp"]) if stop - 1 > ci else secs(c["timestamp"])
+    for e in raw[stop:]:
+        if e["period"] != c["period"] or e["possession"] != c["possession"]:
             return ""
-
-        value = value.get(key)
-
-    if isinstance(value, dict):
-        return value.get("name", "")
-
-    return value if value is not None else ""
+        if secs(e["timestamp"]) - t_stop > LIMIT_S:
+            return ""
+        if nm(e, "type") == "Shot" and nm(e, "team") == nm(c, "team"):
+            return e["id"]
+    return ""
 
 
-def parse_timestamp(timestamp):
-    """Convert a StatsBomb timestamp into a datetime."""
-
-    try:
-        return datetime.fromisoformat(
-            timestamp.replace("Z", "+00:00")
-        )
-    except (ValueError, AttributeError):
-        return None
-
-
-def event_id(event):
-    return str(event.get("id", ""))
-
-
-def event_period(event):
-    return str(event.get("period", ""))
-
-
-def event_type(event):
-    return get_nested_name(event, "type")
-
-
-def event_team(event):
-    return get_nested_name(event, "team")
-
-
-def is_corner(event):
-    return (
-        event_type(event) == "Pass"
-        and get_nested_name(event, "pass", "type") == "Corner"
-    )
-
-
-def get_shot_outcome(event):
-    return get_nested_name(event, "shot", "outcome")
-
-
-# --------------------------------------------------
-# LOAD CSV FILES
-# --------------------------------------------------
-
-def load_csv(path):
-
-    if not path.exists():
-        raise FileNotFoundError(f"File not found: {path}")
-
-    with open(path, "r", encoding="utf-8-sig", newline="") as file:
-        return list(csv.DictReader(file))
-
-
-# --------------------------------------------------
-# SELECT A RANDOM, REPRODUCIBLE SAMPLE
-# --------------------------------------------------
-
-def select_sample(corners, sample_size):
-
-    if sample_size >= len(corners):
-        return corners
-
-    random.seed(RANDOM_SEED)
-
-    outcomes = defaultdict(list)
-
-    for corner in corners:
-        outcomes[corner["outcome"]].append(corner)
-
-    # Proportional allocation across outcome categories.
-    allocations = {}
-
-    for outcome, records in outcomes.items():
-        allocations[outcome] = (
-            sample_size * len(records) / len(corners)
-        )
-
-    quotas = {
-        outcome: int(value)
-        for outcome, value in allocations.items()
-    }
-
-    remaining = sample_size - sum(quotas.values())
-
-    ranked = sorted(
-        allocations,
-        key=lambda outcome: allocations[outcome] - quotas[outcome],
-        reverse=True
-    )
-
-    for outcome in ranked[:remaining]:
-        quotas[outcome] += 1
-
-    sample = []
-
-    for outcome, records in outcomes.items():
-        count = min(quotas[outcome], len(records))
-        sample.extend(random.sample(records, count))
-
-    return sample
-
-
-# --------------------------------------------------
-# LOAD ORIGINAL MATCH EVENTS
-# --------------------------------------------------
-
-def load_match_events(competition, match_id):
-
-    folder = DATASETS.get(competition)
-
-    if folder is None:
-        raise ValueError(
-            f"Unknown competition: {competition}"
-        )
-
-    path = folder / f"{match_id}.json"
-
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Original match file not found: {path}"
-        )
-
-    with open(path, "r", encoding="utf-8") as file:
-        events = json.load(file)
-
-    # StatsBomb event JSON is normally a list.
-    if not isinstance(events, list):
-        raise ValueError("Unexpected match JSON format")
-
-    return events
-
-
-# --------------------------------------------------
-# INDEPENDENTLY RE-EVALUATE A CORNER SEQUENCE
-# --------------------------------------------------
-
-def find_corner_sequence(events, corner_index):
-
-    corner = events[corner_index]
-
-    attacking_team = get_nested_name(
-        corner, "possession_team"
-    )
-
-    corner_timestamp = parse_timestamp(
-        corner.get("timestamp")
-    )
-
-    sequence = []
-
-    outcome = "no_clear_terminal_outcome"
-    terminal_reason = "cutoff_or_no_terminal_event"
-
-    for event in events[corner_index + 1:]:
-
-        # Stop if the period changes.
-        if event_period(event) != event_period(corner):
-            terminal_reason = "period_change"
+def sample(seqs, n):
+    """Stratified by competition x outcome, proportional allocation, fixed seed."""
+    rng = random.Random(SEED)
+    strata = defaultdict(list)
+    for s in seqs:
+        strata[(s["competition"], s["outcome"])].append(s)
+    share = {k: n * len(v) / len(seqs) for k, v in strata.items()}
+    quota = {k: max(1, int(v)) for k, v in share.items()}
+    for k in sorted(share, key=lambda k: share[k] - int(share[k]), reverse=True):
+        if sum(quota.values()) >= n:
             break
+        quota[k] += 1
+    picked = []
+    for k in sorted(strata):
+        picked += rng.sample(strata[k], min(quota[k], len(strata[k])))
+    return sorted(picked, key=lambda s: s["corner_id"])
 
-        current_timestamp = parse_timestamp(
-            event.get("timestamp")
-        )
-
-        # Apply the 15-second cutoff.
-        if corner_timestamp and current_timestamp:
-
-            elapsed = (
-                current_timestamp - corner_timestamp
-            ).total_seconds()
-
-            if elapsed > MAX_SECONDS:
-                terminal_reason = "15_second_cutoff"
-                break
-
-        sequence.append(event)
-
-        kind = event_type(event)
-
-        # First shot determines the shot outcome.
-        if kind == "Shot":
-
-            if get_shot_outcome(event) == "Goal":
-                outcome = "goal"
-            else:
-                outcome = "shot_no_goal"
-
-            terminal_reason = "shot"
-            break
-
-        # Foul or offside.
-        if kind == "Foul Committed":
-            outcome = "foul_or_offside"
-            terminal_reason = "foul"
-            break
-
-        if kind == "Offside":
-            outcome = "foul_or_offside"
-            terminal_reason = "offside"
-            break
-
-        # Another restart.
-        pass_type = get_nested_name(
-            event, "pass", "type"
-        )
-
-        if pass_type in [
-            "Goal Kick",
-            "Throw-in",
-            "Free Kick",
-            "Corner"
-        ]:
-            outcome = "another_restart"
-            terminal_reason = "another_restart"
-            break
-
-        # Ball out of play.
-        if kind in ["Ball Out", "Out"]:
-            outcome = "ball_out_of_play"
-            terminal_reason = "ball_out"
-            break
-
-        # Possession changes to the opposing team.
-        possession_team = get_nested_name(
-            event, "possession_team"
-        )
-
-        if (
-            possession_team
-            and attacking_team
-            and possession_team != attacking_team
-        ):
-            outcome = "possession_loss"
-            terminal_reason = "possession_change"
-            break
-
-        # Apply the 10-event cutoff.
-        if len(sequence) >= MAX_EVENTS:
-            terminal_reason = "10_event_cutoff"
-            break
-
-    return sequence, outcome, terminal_reason
-
-
-# --------------------------------------------------
-# VALIDATE ONE CORNER
-# --------------------------------------------------
-
-def audit_corner(corner, audit_events):
-
-    result = {
-        "corner_id": corner.get("corner_id", ""),
-        "match_id": corner.get("match_id", ""),
-        "competition": corner.get("competition", ""),
-        "original_outcome": corner.get("outcome", ""),
-        "corner_found": "NO",
-        "events_match": "NO",
-        "event_order_match": "NO",
-        "timestamp_check": "NOT CHECKED",
-        "recalculated_outcome": "NOT CHECKED",
-        "outcome_match": "NOT CHECKED",
-        "terminal_reason": "",
-        "audit_status": "FAIL",
-        "notes": "",
-    }
-
-    try:
-
-        match_id = corner["match_id"]
-        competition = corner["competition"]
-
-        events = load_match_events(
-            competition, match_id
-        )
-
-        # Sort audit events by their recorded event number.
-        audit_events = sorted(
-            audit_events,
-            key=lambda row: int(
-                row.get("event_number") or 0
-            )
-        )
-
-        if not audit_events:
-            result["notes"] = "No audit events found"
-            return result
-
-        # The first audit event should be the corner itself.
-        corner_event_id = audit_events[0].get("event_id", "")
-
-        if not corner_event_id:
-            result["notes"] = "Missing corner event ID"
-            return result
-
-        # Locate the corner in the original JSON.
-        corner_index = next(
-            (
-                i for i, event in enumerate(events)
-                if event_id(event) == str(corner_event_id)
-            ),
-            None
-        )
-
-        if corner_index is None:
-            result["notes"] = "Corner ID not found in original JSON"
-            return result
-
-        original_corner = events[corner_index]
-
-        if not is_corner(original_corner):
-            result["notes"] = "Located event is not a corner"
-            return result
-
-        result["corner_found"] = "YES"
-
-        # Extract original event IDs from the audit CSV.
-        extracted_ids = [
-            str(row.get("event_id", ""))
-            for row in audit_events
-        ]
-
-        # Independently reconstruct the sequence.
-        raw_sequence, new_outcome, reason = (
-            find_corner_sequence(events, corner_index)
-        )
-
-        expected_ids = [
-            event_id(original_corner)
-        ] + [
-            event_id(event) for event in raw_sequence
-        ]
-
-        result["events_match"] = (
-            "YES" if set(extracted_ids) == set(expected_ids)
-            else "NO"
-        )
-
-        result["event_order_match"] = (
-            "YES" if extracted_ids == expected_ids
-            else "NO"
-        )
-
-        # Compare the recorded and original timestamps.
-        original_timestamp = original_corner.get("timestamp", "")
-        recorded_timestamp = audit_events[0].get("timestamp", "")
-
-        result["timestamp_check"] = (
-            "YES" if original_timestamp == recorded_timestamp
-            else "NO"
-        )
-
-        result["recalculated_outcome"] = new_outcome
-
-        original_outcome = corner.get("outcome", "")
-
-        result["outcome_match"] = (
-            "YES" if original_outcome == new_outcome
-            else "NO"
-        )
-
-        result["terminal_reason"] = reason
-
-        # Decide the audit status.
-        if (
-            result["events_match"] == "YES"
-            and result["event_order_match"] == "YES"
-            and result["timestamp_check"] == "YES"
-            and result["outcome_match"] == "YES"
-        ):
-
-            if new_outcome == "no_clear_terminal_outcome":
-                result["audit_status"] = "REVIEW"
-                result["notes"] = (
-                    "Unresolved sequence requires human review"
-                )
-            else:
-                result["audit_status"] = "PASS"
-                result["notes"] = "Automated checks agree"
-
-        else:
-            result["audit_status"] = "FAIL"
-            result["notes"] = (
-                "One or more automated checks disagree"
-            )
-
-    except Exception as error:
-
-        result["audit_status"] = "FAIL"
-        result["notes"] = str(error)
-
-    return result
-
-
-# --------------------------------------------------
-# MAIN AUDIT PROCESS
-# --------------------------------------------------
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sample-size", type=int, default=100)
+    n = ap.parse_args().sample_size
 
-    parser = argparse.ArgumentParser(
-        description="Audit extracted StatsBomb corner sequences"
-    )
+    seqs = list(csv.DictReader(open(OUT / "corner_sequences.csv", encoding="utf-8")))
+    events = defaultdict(list)
+    for r in csv.DictReader(open(OUT / "sequence_events_audit.csv", encoding="utf-8")):
+        events[r["corner_id"]].append(r)
+    picked = sample(seqs, n)
+    raw_cache, results, sheet = {}, [], ["# Corner audit sheet", "",
+                                         "One block per sampled corner. Reviewer: tick `reviewer_ok` in "
+                                         "`audit_results.csv` after reading the raw events below.", ""]
+    for s in picked:
+        key = (s["competition"], s["match_id"])
+        if key not in raw_cache:
+            raw = json.load(open(FOLDERS[s["competition"]] / f"{s['match_id']}.json", encoding="utf-8"))
+            raw.sort(key=lambda e: e["index"])
+            raw_cache[key] = raw
+        raw = raw_cache[key]
+        rows = sorted(events[s["corner_id"]], key=lambda r: int(r["event_number"]))
+        corner_eid = s["corner_id"].rsplit("_", 1)[1]
+        pos = {e["id"]: i for i, e in enumerate(raw)}
+        res = {"corner_id": s["corner_id"], "competition": s["competition"], "match_id": s["match_id"],
+               "extracted_outcome": s["outcome"], "extracted_reason": s["terminal_reason"]}
+        ci = pos.get(corner_eid)
+        res["corner_found"] = int(ci is not None and nm(raw[ci], "pass", "type") == "Corner")
+        if not res["corner_found"]:
+            res.update(audit_status="FAIL", notes="corner not found")
+            results.append(res)
+            continue
+        exp = expected(raw, ci)
+        got = [r["event_id"] for r in rows[1:]]
+        idx = [pos.get(g, -1) for g in got]
+        res["membership_ok"] = int(got == exp["ids"])
+        res["order_ok"] = int(idx == list(range(ci + 1, ci + 1 + len(idx))))
+        res["expected_outcome"] = exp["label"]
+        res["outcome_ok"] = int(exp["label"] == s["outcome"])
+        res["shot_label_ok"] = int(int(exp["label"] in {"shot_no_goal", "goal"}) == int(s["shot"]))
+        exp_term = exp["term"]["id"] if exp["term"] else ""
+        res["terminal_ok"] = int(exp_term == s["terminal_event_id"])
+        el = float(s["elapsed_seconds"])
+        n_act = int(s["sequence_action_count"])
+        cut_ok = el <= LIMIT_S and n_act <= LIMIT_A
+        if s["terminal_reason"] == "time_cutoff":
+            nxt = raw[ci + 1 + len(got)] if ci + 1 + len(got) < len(raw) else None
+            cut_ok &= nxt is not None and secs(nxt["timestamp"]) - secs(raw[ci]["timestamp"]) > LIMIT_S
+        if s["terminal_reason"] == "action_cutoff":
+            cut_ok &= n_act == LIMIT_A
+        res["cutoff_ok"] = int(cut_ok)
+        res["missed_shot_event_id"] = missed_shot(raw, ci, exp["stop"]) if s["shot"] == "0" else ""
+        checks = ["membership_ok", "order_ok", "outcome_ok", "shot_label_ok", "terminal_ok", "cutoff_ok"]
+        res["audit_status"] = "PASS" if all(res[c] for c in checks) else "FAIL"
+        res["notes"] = "cutoff hides a later shot in same possession" if res["missed_shot_event_id"] else ""
+        res["reviewer_ok"] = ""
+        res["reviewer"] = ""
+        results.append(res)
 
-    parser.add_argument(
-        "--sample-size",
-        type=int,
-        default=SAMPLE_SIZE
-    )
+        sheet += [f"## {s['corner_id']}", "",
+                  f"Team: {s['attacking_team']} | outcome: `{s['outcome']}` | reason: `{s['terminal_reason']}` "
+                  f"| shot: {s['shot']} | {el:.1f} s, {n_act} actions | audit: {res['audit_status']}", "",
+                  "| # | raw index | type | team | time | possession | detail |", "|---|---|---|---|---|---|---|"]
+        for r in rows:
+            sheet.append(f"| {r['event_number']} | {r['event_index']} | {r['event_type']} | {r['team']} | "
+                         f"{r['timestamp']} | {r['possession']} | {r['detail']} |")
+        nxt = raw[ci + 1 + len(got)] if ci + 1 + len(got) < len(raw) else None
+        if nxt is not None:
+            sheet.append(f"| next (not included) | {nxt['index']} | {nm(nxt, 'type')} | {nm(nxt, 'team')} | "
+                         f"{nxt['timestamp']} | {nxt['possession']} | {nm(nxt, 'pass', 'type')} |")
+        sheet.append("")
 
-    args = parser.parse_args()
+    with open(OUT / "audit_sample.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["corner_id"])
+        w.writerows([[s["corner_id"]] for s in picked])
+    fields = list(dict.fromkeys(k for r in results for k in r))
+    with open(OUT / "audit_results.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows(results)
+    (OUT / "audit_sheet.md").write_text("\n".join(sheet) + "\n", encoding="utf-8")
 
-    print("=" * 55)
-    print("STATSBOMB CORNER SEQUENCE AUDIT")
-    print("=" * 55)
-
-    corners = load_csv(CORNER_FILE)
-    audit_rows = load_csv(EVENT_AUDIT_FILE)
-
-    # Group event rows by corner ID.
-    grouped_events = defaultdict(list)
-
-    for row in audit_rows:
-        grouped_events[row["corner_id"]].append(row)
-
-    print(f"\nTotal extracted corners: {len(corners)}")
-    print(f"Audit event records: {len(audit_rows)}")
-
-    sample = select_sample(
-        corners,
-        args.sample_size
-    )
-
-    print(f"Selected sample: {len(sample)}")
-
-    results = []
-
-    for number, corner in enumerate(sample, start=1):
-
-        corner_id = corner.get("corner_id", "")
-
-        print(
-            f"Auditing {number}/{len(sample)}: {corner_id}"
-        )
-
-        result = audit_corner(
-            corner,
-            grouped_events.get(corner_id, [])
-        )
-
-        results.append(result)
-
-    # Save detailed results.
-    results_path = OUTPUT_DIR / "audit_results.csv"
-
-    fieldnames = list(results[0].keys()) if results else []
-
-    with open(
-        results_path,
-        "w",
-        encoding="utf-8",
-        newline=""
-    ) as file:
-
-        writer = csv.DictWriter(
-            file,
-            fieldnames=fieldnames
-        )
-
-        writer.writeheader()
-        writer.writerows(results)
-
-    # Summary.
-    statuses = Counter(
-        result["audit_status"]
-        for result in results
-    )
-
-    print("\n" + "=" * 55)
-    print("AUDIT SUMMARY")
-    print("=" * 55)
-
-    print(f"Total audited: {len(results)}")
-    print(f"PASS: {statuses['PASS']}")
-    print(f"REVIEW: {statuses['REVIEW']}")
-    print(f"FAIL: {statuses['FAIL']}")
-
-    print("\nOutcome comparison:")
-
-    for outcome, count in Counter(
-        result["original_outcome"]
-        for result in results
-    ).items():
-
-        print(f"{outcome}: {count}")
-
-    print("\nResults saved to:")
-    print(results_path)
-
-    print("\nAudit completed.")
+    total = len(results)
+    lines = ["# Audit report", "", f"Sample: {total} corners, stratified by competition x outcome, seed {SEED}.",
+             "", "| Check | Passed | Rate | 95% CI (Wilson) |", "|---|---:|---:|---|"]
+    for c in ["corner_found", "membership_ok", "order_ok", "terminal_ok", "outcome_ok",
+              "shot_label_ok", "cutoff_ok"]:
+        k = sum(int(r.get(c, 0)) for r in results)
+        lo, hi = wilson(k, total)
+        lines.append(f"| {c} | {k}/{total} | {k / total:.1%} | {lo:.1%} - {hi:.1%} |")
+    k = sum(r["audit_status"] == "PASS" for r in results)
+    lo, hi = wilson(k, total)
+    lines += [f"| **all checks** | {k}/{total} | {k / total:.1%} | {lo:.1%} - {hi:.1%} |", "",
+              "## Sample composition", "", "| Outcome | n |", "|---|---:|"]
+    lines += [f"| {o} | {c} |" for o, c in Counter(r["extracted_outcome"] for r in results).most_common()]
+    missed = [r for r in results if r.get("missed_shot_event_id")]
+    lines += ["", "## Cutoff sensitivity", "",
+              f"{len(missed)} of {sum(1 for s in picked if s['shot'] == '0')} sampled `shot = 0` corners have an "
+              "attacking shot in the same possession shortly after the stopping point. These are correct under "
+              "the pre-registered rule but show what the cutoff excludes.", ""]
+    lines += [f"- {r['corner_id']} (shot event {r['missed_shot_event_id']})" for r in missed]
+    fails = [r for r in results if r["audit_status"] != "PASS"]
+    lines += ["", "## Failures", ""] + ([f"- {r['corner_id']}: {r}" for r in fails] or ["None."])
+    (OUT / "audit_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n".join(lines))
 
 
 if __name__ == "__main__":

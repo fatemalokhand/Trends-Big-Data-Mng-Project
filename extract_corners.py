@@ -1,337 +1,295 @@
-"""This script extracts corner kick sequences from StatsBomb event data.
-It identifies corner kicks, tracks the subsequent events, and determines the outcome of each sequence.
-The results are saved to CSV files for further analysis."""
+"""Phase 1 corner extraction for P6-a.
 
-import json
+Reads StatsBomb event JSON for every downloaded match and writes:
+
+  outputs/corners.csv               one row per corner: identifiers + delivery features
+  outputs/corner_sequences.csv      one row per corner: sequence summary + outcome labels
+  outputs/sequence_events_audit.csv one row per event in each sequence (for auditing)
+  outputs/validation_report.md      counts and integrity checks
+
+Sequence rules are documented in METHODOLOGY.md. Run from the repo root:
+    python extract_corners.py
+"""
+
 import csv
-from pathlib import Path
+import json
+from collections import Counter
 from datetime import datetime
+from pathlib import Path
 
-# DATASET LOCATIONS
-
+BASE_DIR = Path(__file__).resolve().parent
 DATASETS = {
-    "World Cup 2022": Path("data/world_cup_2022"),
-    "Euro 2020": Path("data/euro_2020")
+    "World Cup 2022": BASE_DIR / "data" / "world_cup_2022",
+    "Euro 2020": BASE_DIR / "data" / "euro_2020",
 }
+OUT = BASE_DIR / "outputs"
+OUT.mkdir(exist_ok=True)
 
-OUTPUT_FOLDER = Path("outputs")
-OUTPUT_FOLDER.mkdir(exist_ok=True)
+MAX_SECONDS = 15   # time cutoff, measured from the corner's timestamp
+MAX_ACTIONS = 10   # on-ball action cutoff (corner itself not counted)
 
-# Proposed safety cutoffs from team members
-MAX_SECONDS = 15
-MAX_EVENTS = 10
+# Events that do not count toward the 10-action cutoff. They are bookkeeping
+# or off-ball records and would otherwise inflate the count (e.g. every pass is
+# followed by a "Ball Receipt*").
+NON_ACTION_TYPES = {
+    "Ball Receipt*", "Pressure", "Substitution", "Tactical Shift",
+    "Injury Stoppage", "Player Off", "Player On", "Bad Behaviour",
+    "Starting XI", "Half Start",
+}
+RESTART_PASS_TYPES = {"Goal Kick", "Throw-in", "Free Kick", "Corner", "Kick Off"}
 
-# HELPER FUNCTIONS
-
-def get_name(value):
-    """Safely extract a StatsBomb name."""
-    if isinstance(value, dict):
-        return value.get("name", "")
-    return ""
+# StatsBomb pitch: 120 x 80. Penalty area: x >= 102, 18 <= y <= 62.
+# Six-yard box: x >= 114, 30 <= y <= 50.
 
 
-def get_timestamp(event):
-    """Convert event timestamp into seconds."""
-    timestamp = event.get("timestamp")
+def name(value):
+    return value.get("name", "") if isinstance(value, dict) else ""
 
-    if not timestamp:
-        return None
 
+def seconds(ts):
     try:
-        parsed = datetime.fromisoformat(
-            timestamp.replace("Z", "+00:00")
-        )
-
-        return (
-            parsed.hour * 3600
-            + parsed.minute * 60
-            + parsed.second
-            + parsed.microsecond / 1_000_000
-        )
-
-    except ValueError:
+        t = datetime.strptime(ts, "%H:%M:%S.%f")
+    except (TypeError, ValueError):
         return None
+    return t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6
 
 
-def get_shot_outcome(event):
-    shot = event.get("shot", {})
-    return get_name(shot.get("outcome"))
+def is_corner(e):
+    return name(e.get("type")) == "Pass" and name(e.get("pass", {}).get("type")) == "Corner"
 
 
-def get_event_description(event):
-    event_type = get_name(event.get("type"))
+# ----------------------------------------------------------------------------
+# Delivery features
+# ----------------------------------------------------------------------------
 
-    if event_type == "Shot":
-        outcome = get_shot_outcome(event)
-        return f"Shot: {outcome or 'Unknown outcome'}"
-
-    return event_type
+def in_box(x, y):
+    return x >= 102 and 18 <= y <= 62
 
 
-# Let's define a function to determine if an event is a corner kick.
-
-def is_corner(event):
-
-    if get_name(event.get("type")) != "Pass":
-        return False
-
-    pass_data = event.get("pass", {})
-
-    return get_name(pass_data.get("type")) == "Corner"
-
-
-# define when a sequence ends
-
-def find_sequence(events, corner_index):
-
-    corner = events[corner_index]
-
-    attacking_team = get_name(corner.get("team"))
-    corner_period = corner.get("period")
-    corner_time = get_timestamp(corner)
-
-    sequence_events = []
-    terminal_label = None
-    terminal_reason = None
-
-    for event in events[corner_index + 1:]:
-
-        # Do not continue into another period
-        if event.get("period") != corner_period:
-            terminal_label = "no_clear_terminal_outcome"
-            terminal_reason = "Period ended"
-            break
-
-        # Apply 15-second time cutoff
-               # Apply 15-second time cutoff
-        event_time = get_timestamp(event)
-
-        if corner_time is not None and event_time is not None:
-
-            elapsed = event_time - corner_time
-
-            # Stop if more than 15 seconds have passed
-            if elapsed < 0 or elapsed > MAX_SECONDS:
-                terminal_label = "no_clear_terminal_outcome"
-                terminal_reason = "15-second cutoff"
-                break
-
-        sequence_events.append(event)
-
-        event_type = get_name(event.get("type"))
-
-        # A goal is a shot with a Goal outcome
-        if event_type == "Shot":
-
-            outcome = get_shot_outcome(event)
-
-            if outcome == "Goal":
-                terminal_label = "goal"
-            else:
-                terminal_label = "shot_no_goal"
-
-            terminal_reason = (
-                f"First shot: {outcome or 'Unknown outcome'}"
-            )
-            break
-
-        # Foul or offside
-        if event_type in ["Foul Committed", "Offside"]:
-            terminal_label = "foul_or_offside"
-            terminal_reason = event_type
-            break
-
-        # Another restart
-        if event_type == "Pass":
-
-            restart_type = get_name(
-                event.get("pass", {}).get("type")
-            )
-
-            if restart_type in [
-                "Goal Kick",
-                "Throw-in",
-                "Free Kick",
-                "Corner"
-            ]:
-                terminal_label = "another_restart"
-                terminal_reason = restart_type
-                break
-
-        # Ball out of play, if explicitly recorded
-        if event_type in ["Ball Out", "Out"]:
-            terminal_label = "ball_out_of_play"
-            terminal_reason = event_type
-            break
-
-        # Detect possession changing to the defending team
-        possession_team = get_name(
-            event.get("possession_team")
-        )
-
-        if (
-            possession_team
-            and possession_team != attacking_team
-        ):
-            terminal_label = "possession_loss"
-            terminal_reason = (
-                f"Possession changed to {possession_team}"
-            )
-            break
-
-        # Maximum 10 subsequent events
-        if len(sequence_events) >= MAX_EVENTS:
-            terminal_label = "no_clear_terminal_outcome"
-            terminal_reason = "10-event cutoff"
-            break
-
-    if terminal_label is None:
-        terminal_label = "no_clear_terminal_outcome"
-        terminal_reason = "No terminal event found"
-
-    return sequence_events, terminal_label, terminal_reason
+def target_zone(corner_y, end):
+    """Zone of the delivery's end location, relative to the corner side."""
+    if not end:
+        return "unknown"
+    x, y = end[0], end[1]
+    # Mirror so the corner is always taken from y = 0 ("near" side = small y).
+    if corner_y > 40:
+        y = 80 - y
+    if x >= 114 and 30 <= y <= 50:
+        if y < 36.67:
+            return "near_post"
+        if y <= 43.33:
+            return "central_six_yard"
+        return "far_post"
+    if in_box(x, y):
+        if 30 <= y <= 50:
+            return "penalty_spot_area"
+        return "near_box_wide" if y < 30 else "far_box_wide"
+    if 90 <= x < 102 and 18 <= y <= 62:
+        return "edge_of_box"
+    return "outside_box"
 
 
-# Now from all downloaded matches, extract corners
+def delivery_features(e):
+    p = e.get("pass", {})
+    loc = e.get("location") or [None, None]
+    end = p.get("end_location")
+    length = p.get("length")
+    zone = target_zone(loc[1] if loc[1] is not None else 0, end)
+    short = bool(length is not None and length < 25 and zone in {"outside_box", "edge_of_box"})
+    technique = name(p.get("technique")) or "Not recorded"
+    return {
+        "corner_side": "left" if (loc[1] or 0) < 40 else "right",  # from attacker's view toward goal at x=120
+        "technique": technique,
+        "is_short": int(short),
+        "delivery_type": "short" if short else technique.lower().replace(" ", "_"),
+        "pass_height": name(p.get("height")),
+        "body_part": name(p.get("body_part")),
+        "pass_length": round(length, 2) if length is not None else "",
+        "end_x": end[0] if end else "",
+        "end_y": end[1] if end else "",
+        "target_zone": zone,
+        # StatsBomb omits pass.outcome when the pass is completed.
+        "delivery_outcome": name(p.get("outcome")) or "Complete",
+        "delivery_completed": int(not p.get("outcome")),
+        "led_to_shot_assist": int(bool(p.get("shot_assist") or p.get("goal_assist"))),
+    }
 
-corner_rows = []
-audit_rows = []
 
-for competition, folder in DATASETS.items():
+# ----------------------------------------------------------------------------
+# Sequence reconstruction
+# ----------------------------------------------------------------------------
 
-    events_folder = folder / "events"
+def find_sequence(events, i):
+    """Return (sequence_events, outcome, terminal_reason, terminal_event, elapsed, n_actions)."""
+    corner = events[i]
+    team = name(corner.get("team"))
+    possession = corner.get("possession")
+    period = corner.get("period")
+    t0 = seconds(corner.get("timestamp"))
+    seq, n_actions, elapsed = [], 0, 0.0
 
-    if not events_folder.exists():
-        print(f"Missing folder: {events_folder}")
-        continue
+    def done(outcome, reason, ev=None):
+        return seq, outcome, reason, ev, round(elapsed, 3), n_actions
 
-    event_files = list(events_folder.glob("*.json"))
+    for e in events[i + 1:]:
+        etype = name(e.get("type"))
+        if e.get("period") != period or etype == "Half End":
+            return done("no_shot", "period_end")
+        # A restart ends the sequence even when it is taken after the time
+        # window (e.g. ball cleared out, throw-in taken 20 s later).
+        if etype == "Pass" and name(e.get("pass", {}).get("type")) in RESTART_PASS_TYPES:
+            return done("restart", "restart_" + name(e["pass"]["type"]).lower().replace(" ", "_"), e)
+        t = seconds(e.get("timestamp"))
+        if t0 is not None and t is not None:
+            if t - t0 > MAX_SECONDS:
+                return done("no_shot", "time_cutoff")
+            elapsed = max(elapsed, t - t0)
 
-    print(f"\nProcessing {competition}")
-    print(f"Matches found: {len(event_files)}")
+        seq.append(e)
+        eteam = name(e.get("team"))
+        if etype not in NON_ACTION_TYPES:
+            n_actions += 1
 
-    for file_path in event_files:
+        if etype == "Shot":
+            if eteam == team:
+                goal = name(e.get("shot", {}).get("outcome")) == "Goal"
+                return done("goal" if goal else "shot_no_goal", "shot", e)
+            return done("possession_loss", "opponent_shot", e)
+        if etype in {"Own Goal Against", "Own Goal For"}:
+            scored_for_attack = (etype == "Own Goal For") == (eteam == team)
+            return done("own_goal" if scored_for_attack else "possession_loss", "own_goal", e)
+        if etype == "Foul Committed":
+            return done("foul_by_attack" if eteam == team else "foul_by_defence", "foul", e)
+        if etype == "Offside" or name(e.get("pass", {}).get("outcome")) == "Pass Offside":
+            return done("offside", "offside", e)
+        if etype == "Referee Ball-Drop":
+            return done("restart", "restart_drop_ball", e)
+        if possession is not None and e.get("possession") != possession:
+            return done("possession_loss", "possession_change", e)
+        if n_actions >= MAX_ACTIONS:
+            return done("no_shot", "action_cutoff")
 
-        match_id = file_path.stem
+    return done("no_shot", "end_of_file")
 
-        with open(file_path, "r", encoding="utf-8") as file:
-            events = json.load(file)
 
-        for index, event in enumerate(events):
+def main():
+    corners, sequences, audit = [], [], []
+    match_files = 0
 
-            if not is_corner(event):
-                continue
-
-            corner_team = get_name(event.get("team"))
-
-            sequence, label, reason = find_sequence(
-                events, index
-            )
-
-            corner_id = (
-                f"{competition}_{match_id}_"
-                f"{event.get('id', index)}"
-            )
-
-            corner_rows.append({
-                "corner_id": corner_id,
-                "competition": competition,
-                "match_id": match_id,
-                "period": event.get("period"),
-                "corner_timestamp": event.get("timestamp"),
-                "attacking_team": corner_team,
-                "corner_x": event.get("location", [None, None])[0],
-                "corner_y": event.get("location", [None, None])[1],
-                "sequence_event_count": len(sequence),
-                "outcome": label,
-                "terminal_reason": reason
-            })
-
-            # Save the individual events for manual auditing
-            audit_rows.append({
-                "corner_id": corner_id,
-                "competition": competition,
-                "match_id": match_id,
-                "event_id": event.get("id"),
-                "event_number": 0,
-                "event_type": "Corner",
-                "team": corner_team,
-                "timestamp": event.get("timestamp"),
-                "description": "Corner kick"
-            })
-
-            for number, sequence_event in enumerate(
-                sequence, start=1
-            ):
-
-                audit_rows.append({
-                    "corner_id": corner_id,
+    for competition, folder in DATASETS.items():
+        files = sorted((folder / "events").glob("*.json"))
+        match_files += len(files)
+        for path in files:
+            events = json.load(open(path, encoding="utf-8"))
+            events.sort(key=lambda e: e.get("index", 0))
+            match_id = path.stem
+            for i, e in enumerate(events):
+                if not is_corner(e):
+                    continue
+                cid = f"{competition}_{match_id}_{e['id']}"
+                loc = e.get("location") or [None, None]
+                base = {
+                    "corner_id": cid,
                     "competition": competition,
                     "match_id": match_id,
-                    "event_id": sequence_event.get("id"),
-                    "event_number": number,
-                    "event_type": get_name(
-                        sequence_event.get("type")
-                    ),
-                    "team": get_name(
-                        sequence_event.get("team")
-                    ),
-                    "timestamp": sequence_event.get("timestamp"),
-                    "description": get_event_description(
-                        sequence_event
-                    )
+                    "event_id": e["id"],
+                    "period": e.get("period"),
+                    "minute": e.get("minute"),
+                    "corner_timestamp": e.get("timestamp"),
+                    "attacking_team": name(e.get("team")),
+                    "taker": name(e.get("player")),
+                    "corner_x": loc[0],
+                    "corner_y": loc[1],
+                }
+                corners.append({**base, **delivery_features(e)})
+
+                seq, outcome, reason, term, elapsed, n_act = find_sequence(events, i)
+                shot = int(outcome in {"shot_no_goal", "goal"})
+                sequences.append({
+                    "corner_id": cid,
+                    "competition": competition,
+                    "match_id": match_id,
+                    "attacking_team": base["attacking_team"],
+                    "sequence_event_count": len(seq),
+                    "sequence_action_count": n_act,
+                    "elapsed_seconds": elapsed,
+                    "terminal_event_id": term["id"] if term else "",
+                    "terminal_event_type": name(term.get("type")) if term else "",
+                    "terminal_reason": reason,
+                    "outcome": outcome,
+                    "shot": shot,
+                    "goal": int(outcome in {"goal", "own_goal"}),
+                    "first_shot_xg": round(term["shot"].get("statsbomb_xg", 0), 4)
+                    if term and name(term.get("type")) == "Shot" and shot else "",
+                    "eligible": 1,  # every reconstructed corner has a defined label
                 })
+                audit.append({"corner_id": cid, "match_id": match_id, "event_number": 0,
+                              "event_id": e["id"], "event_index": e.get("index"),
+                              "event_type": "Corner", "team": base["attacking_team"],
+                              "timestamp": e.get("timestamp"), "possession": e.get("possession"),
+                              "detail": f"{corners[-1]['delivery_type']} -> {corners[-1]['target_zone']}"})
+                for n, s in enumerate(seq, 1):
+                    stype = name(s.get("type"))
+                    detail = name(s.get("shot", {}).get("outcome")) if stype == "Shot" else \
+                        name(s.get("pass", {}).get("type")) or name(s.get("pass", {}).get("outcome"))
+                    audit.append({"corner_id": cid, "match_id": match_id, "event_number": n,
+                                  "event_id": s["id"], "event_index": s.get("index"),
+                                  "event_type": stype, "team": name(s.get("team")),
+                                  "timestamp": s.get("timestamp"), "possession": s.get("possession"),
+                                  "detail": detail})
+
+    for fname, rows in [("corners.csv", corners), ("corner_sequences.csv", sequences),
+                        ("sequence_events_audit.csv", audit)]:
+        with open(OUT / fname, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=rows[0].keys())
+            w.writeheader()
+            w.writerows(rows)
+
+    write_validation_report(match_files, corners, sequences, audit)
+    print(f"Matches: {match_files}  Corners: {len(corners)}")
+    print(Counter(s["outcome"] for s in sequences))
 
 
-# --------------------------------------------------
-# 6. EXPORT RESULTS
-# --------------------------------------------------
+def write_validation_report(match_files, corners, sequences, audit):
+    ids = [c["corner_id"] for c in corners]
+    seq_ids = {s["corner_id"] for s in sequences}
+    by_comp = Counter(c["competition"] for c in corners)
+    matches_with_corners = len({(c["competition"], c["match_id"]) for c in corners})
+    checks = [
+        ("Corner IDs unique", len(ids) == len(set(ids))),
+        ("Every corner has exactly one delivery record", len(corners) == len(set(ids))),
+        ("Every corner has exactly one sequence record",
+         len(sequences) == len(corners) and seq_ids == set(ids)),
+        ("Every corner has a corner row in the event audit file",
+         sum(1 for a in audit if a["event_number"] == 0) == len(corners)),
+        ("No sequence exceeds 15 s", all(float(s["elapsed_seconds"]) <= MAX_SECONDS for s in sequences)),
+        ("No sequence exceeds 10 actions", all(s["sequence_action_count"] <= MAX_ACTIONS for s in sequences)),
+        ("Every corner has a label", all(s["outcome"] for s in sequences)),
+    ]
+    lines = ["# Phase 1 validation report", "",
+             "Generated by `extract_corners.py`.", "",
+             "## Counts", "",
+             f"- Match event files: {match_files}",
+             f"- Matches containing at least one corner: {matches_with_corners}",
+             f"- Corners: {len(corners)} ({', '.join(f'{k}: {v}' for k, v in by_comp.items())})",
+             f"- Sequence events (incl. corners): {len(audit)}", "",
+             "## Integrity checks", "", "| Check | Result |", "|---|---|"]
+    lines += [f"| {c} | {'PASS' if ok else 'FAIL'} |" for c, ok in checks]
+    for title, key, rows in [("Outcome labels", "outcome", sequences),
+                             ("Terminal reasons", "terminal_reason", sequences),
+                             ("Delivery type", "delivery_type", corners),
+                             ("Target zone", "target_zone", corners),
+                             ("Delivery outcome", "delivery_outcome", corners)]:
+        lines += ["", f"## {title}", "", "| Value | Count | Share |", "|---|---:|---:|"]
+        for v, n in Counter(r[key] for r in rows).most_common():
+            lines.append(f"| {v} | {n} | {n / len(rows):.1%} |")
+    shots = sum(s["shot"] for s in sequences)
+    lines += ["", "## Binary target", "",
+              f"- `shot = 1`: {shots} ({shots / len(sequences):.1%})",
+              f"- `shot = 0`: {len(sequences) - shots}",
+              f"- Goals (incl. own goals): {sum(s['goal'] for s in sequences)}"]
+    (OUT / "validation_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-if corner_rows:
 
-    with open(
-        OUTPUT_FOLDER / "corner_sequences.csv",
-        "w",
-        newline="",
-        encoding="utf-8"
-    ) as file:
-
-        writer = csv.DictWriter(
-            file,
-            fieldnames=corner_rows[0].keys()
-        )
-
-        writer.writeheader()
-        writer.writerows(corner_rows)
-
-    with open(
-        OUTPUT_FOLDER / "sequence_events_audit.csv",
-        "w",
-        newline="",
-        encoding="utf-8"
-    ) as file:
-
-        writer = csv.DictWriter(
-            file,
-            fieldnames=audit_rows[0].keys()
-        )
-
-        writer.writeheader()
-        writer.writerows(audit_rows)
-
-    print("\nEXTRACTION COMPLETE")
-    print("Total corners:", len(corner_rows))
-
-    print("\nOUTCOME SUMMARY")
-
-    counts = {}
-
-    for row in corner_rows:
-        outcome = row["outcome"]
-        counts[outcome] = counts.get(outcome, 0) + 1
-
-    for outcome, count in counts.items():
-        print(f"{outcome}: {count}")
-
-else:
-    print("\nNo corners were extracted.")
+if __name__ == "__main__":
+    main()

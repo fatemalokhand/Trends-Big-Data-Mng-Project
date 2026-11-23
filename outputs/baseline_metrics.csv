@@ -1,0 +1,7 @@
+split,baseline,n,shot_rate,accuracy,balanced_accuracy,log_loss,brier,roc_auc
+train,majority_class,747,0.3173,0.6827,0.5,10.9581,0.3173,0.5
+train,training_shot_rate,747,0.3173,0.6827,0.5,0.6248,0.2166,0.5
+validation,majority_class,138,0.3116,0.6884,0.5,10.7621,0.3116,0.5
+validation,training_shot_rate,138,0.3116,0.6884,0.5,0.6204,0.2145,0.5
+test,majority_class,145,0.3517,0.6483,0.5,12.1481,0.3517,0.5
+test,training_shot_rate,145,0.3517,0.6483,0.5,0.6512,0.2292,0.5
